@@ -1,5 +1,4 @@
 const express = require('express');
-const passport = require('passport');
 const {
   getProducts,
   getProductById,
@@ -7,6 +6,8 @@ const {
   updateProduct,
   deleteProduct
 } = require('../controllers/productController');
+const { isAuthenticated, isAdmin } = require('../middleware/authMiddleware');
+
 
 const router = express.Router();
 
@@ -15,8 +16,8 @@ router.get('/', getProducts);
 router.get('/:id', getProductById);
 
 // Protected Routes (Only Admins Can Modify Products)
-router.post('/', passport.authenticate('jwt', { session: false }), createProduct);
-router.put('/:id', passport.authenticate('jwt', { session: false }), updateProduct);
-router.delete('/:id', passport.authenticate('jwt', { session: false }), deleteProduct);
+router.post('/', isAuthenticated, isAdmin, createProduct);
+router.put('/:id', isAuthenticated, isAdmin, updateProduct);
+router.delete('/:id', isAuthenticated, isAdmin, deleteProduct);
 
 module.exports = router;

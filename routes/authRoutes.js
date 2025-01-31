@@ -1,14 +1,14 @@
 const express = require('express');
-const passport = require('passport');
 const { signup, login, getProfile } = require('../controllers/authController');
+const { isAuthenticated } = require('../middleware/authMiddleware'); 
 
 const router = express.Router();
 
-// Public Routes
+// Public Routes (No Authentication Required)
 router.post('/signup', signup);
 router.post('/login', login);
 
 // Protected Route (Requires JWT)
-router.get('/profile', passport.authenticate('jwt', { session: false }), getProfile);
+router.get('/profile', isAuthenticated, getProfile);
 
 module.exports = router;

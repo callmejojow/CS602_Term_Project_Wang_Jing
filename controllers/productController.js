@@ -29,57 +29,67 @@ exports.getProductById = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: "Internal server error", details: error.message });
     }
-  };
+};
   
 
 
 // POST Create a New Product (Admin Only)
 exports.createProduct = async (req, res) => {
-  try {
-    // Ensure only admins can add products
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ message: "Unauthorized. You must login as admin to create a new product." });
+    try {
+      const { name, description, price, stock } = req.body;
+  
+      if (!name || !description || !price || !stock) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+  
+      const newProduct = new Product({ name, description, price, stock });
+      await newProduct.save();
+  
+      res.status(201).json(newProduct);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create product" });
     }
-
-    const { name, description, price, stock, imageUrl } = req.body;
-    const newProduct = new Product({ name, description, price, stock, imageUrl });
-
-    await newProduct.save();
-    res.status(201).json(newProduct);
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-};
+  };
 
 // PUT Update a Product (Admin Only)
 exports.updateProduct = async (req, res) => {
-  try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ message: "Unauthorized. You must login as admin to update a product." });
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid product ID format" });
+      }
+  
+      const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });
+  
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      res.json(updatedProduct);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update product" });
     }
-
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    res.json(product);
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
 };
 
 // DELETE Remove a Product (Admin Only)
 exports.deleteProduct = async (req, res) => {
-  try {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ message: "Unauthorized. You must login as admin to delete a product." });
+    try {
+      const { id } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid product ID format" });
+      }
+  
+      const deletedProduct = await Product.findByIdAndDelete(id);
+  
+      if (!deletedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete product" });
     }
-
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    res.json({ message: "Product deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
 };
