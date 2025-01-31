@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-// ✅ User Signup
+// User Signup
 exports.signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -22,18 +22,18 @@ exports.signup = async (req, res) => {
   }
 };
 
-// ✅ User Login
+// User Login
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Find user
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ message: "Invalid email" });
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ message: "Wrong password" });
 
     // Generate JWT Token
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// ✅ Get User Profile (Protected)
+// Get User Profile (Protected)
 exports.getProfile = (req, res) => {
   res.json({ message: "Profile accessed successfully", user: req.user });
 };
