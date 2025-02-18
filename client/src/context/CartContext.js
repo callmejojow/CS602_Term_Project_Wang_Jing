@@ -6,8 +6,10 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [] });
 
   const addToCart = async (productId, quantity) => {
-    // Implement later
-    console.log('Adding to cart:', productId, quantity);
+    setCart(prevCart => ({
+      ...prevCart,
+      items: [...prevCart.items, { productId, quantity }]
+    }));
   };
 
   return (

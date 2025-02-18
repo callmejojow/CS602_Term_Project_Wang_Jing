@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -8,26 +7,10 @@ import {
   Box,
   CardMedia
 } from '@mui/material';
-import { ShoppingCart as CartIcon } from '@mui/icons-material';
-import { useAuth } from '../../context/AuthContext';
-import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { addToCart } = useCart();
-
-  const handleAddToCart = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    try {
-      await addToCart(product._id, 1);
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-    }
-  };
 
   return (
     <Card 
@@ -57,7 +40,7 @@ const ProductCard = ({ product }) => {
         </Typography>
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6" color="primary">
-            ${product.price.toFixed(2)}
+            ${product.price?.toFixed(2)}
           </Typography>
           <Typography variant="body2" color={product.stock > 0 ? 'success.main' : 'error.main'}>
             {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
@@ -70,15 +53,6 @@ const ProductCard = ({ product }) => {
           onClick={() => navigate(`/products/${product._id}`)}
         >
           View Details
-        </Button>
-        <Button
-          size="small"
-          color="primary"
-          startIcon={<CartIcon />}
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-        >
-          Add to Cart
         </Button>
       </CardActions>
     </Card>

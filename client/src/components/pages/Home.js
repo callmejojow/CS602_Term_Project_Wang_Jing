@@ -1,7 +1,44 @@
-import { Box, Container, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Container, Typography, CircularProgress } from '@mui/material';
+import api from '../../utils/axios';
 import ProductList from '../products/ProductList';
 
 const Home = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/products');
+        setProducts(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch products');
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       {/* Hero Section */}
@@ -38,7 +75,7 @@ const Home = () => {
         </Container>
       </Box>
 
-      {/* Featured Categories */}
+      {/* Featured Products Section */}
       <Container maxWidth="lg" sx={{ mb: 6 }}>
         <Typography 
           variant="h4" 
@@ -52,8 +89,7 @@ const Home = () => {
           Featured Products
         </Typography>
         
-        {/* Product List Component */}
-        <ProductList />
+        <ProductList products={products} />
       </Container>
 
       {/* Why Choose Us Section */}
