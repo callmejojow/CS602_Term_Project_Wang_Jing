@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
@@ -6,8 +6,10 @@ const AuthContext = createContext(null);
 // You might want to set a base URL for all axios requests
 axios.defaults.baseURL = 'http://localhost:3000/api';
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children, onLogin }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const login = async (email, password) => {
     try {
@@ -23,10 +25,14 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
+      // Call the callback function after successful login
+      if (onLogin) await onLogin();
+      return response.data;
     } catch (error) {
       console.error('Full error:', error); // Debug log
       console.error('Login error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.error || 'Failed to login');
+      setError(error.response?.data?.message || 'Failed to login');
+      throw error;
     }
   };
 
@@ -57,14 +63,42 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
+  const logout = async () => {
+    try {
+      await axios.post('/auth/logout');
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   };
 
+  const checkAuth = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/auth/check');
+      setUser(response.data.user);
+      // Call the callback function if user is authenticated
+      if (response.data.user && onLogin) {
+        await onLogin();
+      }
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [onLogin]);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      error,
+      login,
+      logout,
+      register,
+      checkAuth
+    }}>
       {children}
     </AuthContext.Provider>
   );

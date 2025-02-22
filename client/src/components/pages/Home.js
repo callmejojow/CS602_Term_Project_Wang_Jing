@@ -27,10 +27,10 @@ const Home = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
       <Typography variant="h3" gutterBottom align="center">
-        Welcome to Tech Store
+        Jing's Gizmo Trove
       </Typography>
       <Typography variant="h6" gutterBottom align="center" color="text.secondary">
-        Discover the Latest in Technology
+        Discover the latest in technology with the lowest prices in town
       </Typography>
 
       <SearchBar onSearchResults={setProducts} />
