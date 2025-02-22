@@ -8,7 +8,8 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Typography
+  Typography,
+  Button
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
@@ -18,24 +19,25 @@ const SearchBar = ({ onSearchResults }) => {
   const [searchType, setSearchType] = useState('name');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
+    console.log('Starting search with:', { searchType, searchTerm }); // Debug log
+
     try {
-      // If search term is empty, fetch all products
       if (!searchTerm.trim()) {
+        console.log('Empty search term, fetching all products');
         const response = await axios.get('http://localhost:3000/api/products');
         console.log('All products:', response.data);
         onSearchResults(response.data);
+        setIsFiltered(false);
       } else {
-        // Updated URL structure to match backend route
-        const searchUrl = `http://localhost:3000/api/products/search/${searchType}`;
-        console.log('Search URL:', searchUrl);
-        
-        const response = await axios.get(searchUrl, {
+        console.log(`Searching by ${searchType}:`, searchTerm.trim());
+        const response = await axios.get('http://localhost:3000/api/products/search', {
           params: {
             [searchType]: searchTerm.trim()
           }
@@ -43,11 +45,29 @@ const SearchBar = ({ onSearchResults }) => {
         
         console.log('Search results:', response.data);
         onSearchResults(response.data);
+        setIsFiltered(true);
       }
     } catch (err) {
-      console.error('Detailed error:', err.response || err);
-      setError(err.response?.data?.error || 'Error fetching products');
+      console.error('Search error:', err.response || err);
+      setError(err.response?.data?.error || 'Error searching products');
       onSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearSearch = async () => {
+    setSearchTerm('');
+    setIsFiltered(false);
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const response = await axios.get('http://localhost:3000/api/products');
+      onSearchResults(response.data);
+    } catch (err) {
+      console.error('Error fetching all products:', err);
+      setError('Error fetching products');
     } finally {
       setLoading(false);
     }
@@ -61,11 +81,11 @@ const SearchBar = ({ onSearchResults }) => {
         sx={{ 
           display: 'flex', 
           gap: 2, 
-          maxWidth: 600,
+          maxWidth: 800,
           mx: 'auto'
         }}
       >
-        <FormControl sx={{ minWidth: 120 }}>
+        <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Search By</InputLabel>
           <Select
             value={searchType}
@@ -96,16 +116,30 @@ const SearchBar = ({ onSearchResults }) => {
         />
       </Box>
 
+      {/* Error Message */}
       {error && (
         <Typography color="error" align="center" sx={{ mt: 2 }}>
           {error}
         </Typography>
       )}
 
+      {/* Loading Message */}
       {loading && (
         <Typography align="center" sx={{ mt: 2 }}>
           Searching...
         </Typography>
+      )}
+
+      {/* Back to All Products button */}
+      {isFiltered && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Button 
+            onClick={handleClearSearch}
+            color="primary"
+          >
+            Back to All Products
+          </Button>
+        </Box>
       )}
     </Box>
   );
