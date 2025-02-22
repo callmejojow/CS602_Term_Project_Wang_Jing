@@ -20,6 +20,7 @@ app.use(cors({
   origin: 'http://localhost:3001'
 }));
 app.use(passport.initialize());
+app.use('/src', express.static('src')); // Serve static files from src directory
 
 // Connect to MongoDB
 connectDB();
