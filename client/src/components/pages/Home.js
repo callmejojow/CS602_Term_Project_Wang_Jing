@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Box, Container, Typography, CircularProgress } from '@mui/material';
-import api from '../../utils/axios';
+import { Container, Typography } from '@mui/material';
+import SearchBar from '../products/SearchBar';
 import ProductList from '../products/ProductList';
+import axios from 'axios';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
+  // Fetch all products on initial load
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products');
+        const response = await axios.get('http://localhost:3000/api/products');
         setProducts(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch products');
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -23,123 +24,27 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box>
-      {/* Hero Section */}
-      <Box 
-        sx={{ 
-          bgcolor: 'primary.main', 
-          color: 'white',
-          py: 8,
-          mb: 4
-        }}
-      >
-        <Container maxWidth="lg">
-          <Typography 
-            variant="h2" 
-            component="h1" 
-            gutterBottom
-            sx={{ 
-              fontWeight: 'bold',
-              textAlign: 'center' 
-            }}
-          >
-            Welcome to Tech Store
-          </Typography>
-          <Typography 
-            variant="h5" 
-            component="h2"
-            sx={{ 
-              textAlign: 'center',
-              opacity: 0.9
-            }}
-          >
-            Discover the Latest in Technology
-          </Typography>
-        </Container>
-      </Box>
+    <Container maxWidth="lg" sx={{ mt: 2 }}>
+      <Typography variant="h3" gutterBottom align="center">
+        Welcome to Tech Store
+      </Typography>
+      <Typography variant="h6" gutterBottom align="center" color="text.secondary">
+        Discover the Latest in Technology
+      </Typography>
 
-      {/* Featured Products Section */}
-      <Container maxWidth="lg" sx={{ mb: 6 }}>
-        <Typography 
-          variant="h4" 
-          component="h2" 
-          gutterBottom
-          sx={{ 
-            textAlign: 'center',
-            mb: 4
-          }}
-        >
-          Featured Products
-        </Typography>
-        
+      <SearchBar onSearchResults={setProducts} />
+
+      {loading ? (
+        <Typography align="center">Loading products...</Typography>
+      ) : products.length > 0 ? (
         <ProductList products={products} />
-      </Container>
-
-      {/* Why Choose Us Section */}
-      <Box sx={{ bgcolor: 'grey.100', py: 6 }}>
-        <Container maxWidth="lg">
-          <Typography 
-            variant="h4" 
-            component="h2" 
-            gutterBottom
-            sx={{ textAlign: 'center', mb: 4 }}
-          >
-            Why Choose Us
-          </Typography>
-          <Box 
-            sx={{ 
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                md: '1fr 1fr 1fr'
-              },
-              gap: 4
-            }}
-          >
-            {[
-              {
-                title: 'Quality Products',
-                description: 'Curated selection of the best tech products'
-              },
-              {
-                title: 'Fast Shipping',
-                description: 'Quick and reliable delivery to your doorstep'
-              },
-              {
-                title: 'Secure Shopping',
-                description: 'Safe and secure shopping experience'
-              }
-            ].map((feature, index) => (
-              <Box key={index} sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                  {feature.title}
-                </Typography>
-                <Typography color="text.secondary">
-                  {feature.description}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </Container>
-      </Box>
-    </Box>
+      ) : (
+        <Typography align="center" color="text.secondary">
+          No products found. Try a different search term.
+        </Typography>
+      )}
+    </Container>
   );
 };
 

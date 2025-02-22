@@ -4,8 +4,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const passport = require('./config/passport');
 const { graphqlHTTP } = require('express-graphql');
-const schema = require('./graphql/schema');
-const resolvers = require('./graphql/resolvers');
+const schema = require('./graphql/schema/index');
+const root = require('./graphql/resolvers/index');
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -16,11 +16,23 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: 'http://localhost:3001'
 }));
 app.use(passport.initialize());
 app.use('/src', express.static('src')); // Serve static files from src directory
+
+// Debug middleware to see all incoming requests
+app.use((req, res, next) => {
+  console.log('Incoming request:', {
+    method: req.method,
+    path: req.path,
+    query: req.query,
+    params: req.params
+  });
+  next();
+});
 
 // Connect to MongoDB
 connectDB();
@@ -39,7 +51,7 @@ app.use('/api/orders', orderRoutes);
 // GraphQL endpoint
 app.use('/graphql', graphqlHTTP({
   schema: schema,
-  rootValue: resolvers,
+  rootValue: root,
   graphiql: true
 }));
 

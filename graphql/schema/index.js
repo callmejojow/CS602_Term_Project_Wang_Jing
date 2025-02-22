@@ -1,27 +1,62 @@
 const { buildSchema } = require('graphql');
-const userType = require('../types/userType');
-const productType = require('../types/productType');
 
 const schema = buildSchema(`
-  ${userType}
-  ${productType}
+  type User {
+    _id: ID!
+    email: String!
+    password: String!
+    name: String
+    role: String
+    createdAt: String
+    updatedAt: String
+  }
+
+  type Product {
+    _id: ID!
+    name: String!
+    description: String
+    price: Float!
+    stock: Int!
+    image: String
+  }
 
   type Query {
+    # User Queries
     getUser(id: ID!): User
     getAllUsers: [User]
-    getProduct(id: ID!): Product
+    
+    # Product Queries
     getAllProducts: [Product]
+    getProduct(id: ID!): Product
+    searchProductsByName(name: String!): [Product]
+    searchProductsByDescription(description: String!): [Product]
+  }
+
+  input UserInput {
+    email: String!
+    password: String!
+    name: String
+  }
+
+  input ProductInput {
+    name: String!
+    description: String
+    price: Float!
+    stock: Int!
+    image: String
   }
 
   type Mutation {
+    # User Mutations
     createUser(input: UserInput): User
     updateUser(id: ID!, input: UserInput): User
     deleteUser(id: ID!): Boolean
-
+    
+    # Product Mutations
     createProduct(input: ProductInput): Product
     updateProduct(id: ID!, input: ProductInput): Product
     deleteProduct(id: ID!): Boolean
   }
 `);
 
-module.exports = schema; 
+module.exports = schema;

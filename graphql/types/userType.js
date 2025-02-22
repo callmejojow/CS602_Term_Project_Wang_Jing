@@ -4,7 +4,7 @@ const userType = `
     email: String!
     password: String!
     name: String
-    role: String
+    role: String!
     createdAt: String
     updatedAt: String
   }
@@ -13,6 +13,7 @@ const userType = `
     email: String!
     password: String!
     name: String
+    role: String
   }
 `;
 

@@ -17,6 +17,19 @@ const productType = `
     stock: Int!
     image: String
   }
+
+  type Query {
+    getProduct(id: ID!): Product
+    getAllProducts: [Product]
+    searchProductsByName(name: String!): [Product]
+    searchProductsByDescription(description: String!): [Product]
+  }
+
+  type Mutation {
+    createProduct(input: ProductInput): Product
+    updateProduct(id: ID!, input: ProductInput): Product
+    deleteProduct(id: ID!): Boolean
+  }
 `;
 
 module.exports = productType; 

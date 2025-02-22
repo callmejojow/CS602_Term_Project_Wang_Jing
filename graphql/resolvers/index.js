@@ -1,44 +1,114 @@
-const User = require('../../models/User');
 const Product = require('../../models/Product');
+const User = require('../../models/User');
 
-const resolvers = {
-  // Queries
+const root = {
+  // User Query Resolvers
   getUser: async ({ id }) => {
-    return await User.findById(id);
-  },
-  getAllUsers: async () => {
-    return await User.find({});
-  },
-  getProduct: async ({ id }) => {
-    return await Product.findById(id);
-  },
-  getAllProducts: async () => {
-    return await Product.find({});
+    try {
+      return await User.findById(id);
+    } catch (error) {
+      throw new Error('Error fetching user');
+    }
   },
 
-  // Mutations
+  getAllUsers: async () => {
+    try {
+      return await User.find({});
+    } catch (error) {
+      throw new Error('Error fetching users');
+    }
+  },
+
+  // Product Query Resolvers
+  getAllProducts: async () => {
+    try {
+      return await Product.find({});
+    } catch (error) {
+      throw new Error('Error fetching products');
+    }
+  },
+
+  getProduct: async ({ id }) => {
+    try {
+      return await Product.findById(id);
+    } catch (error) {
+      throw new Error('Error fetching product');
+    }
+  },
+
+  searchProductsByName: async ({ name }) => {
+    try {
+      return await Product.find({
+        name: { $regex: name, $options: 'i' }
+      });
+    } catch (error) {
+      throw new Error('Error searching products by name');
+    }
+  },
+
+  searchProductsByDescription: async ({ description }) => {
+    try {
+      return await Product.find({
+        description: { $regex: description, $options: 'i' }
+      });
+    } catch (error) {
+      throw new Error('Error searching products by description');
+    }
+  },
+
+  // User Mutation Resolvers
   createUser: async ({ input }) => {
-    const user = new User(input);
-    return await user.save();
+    try {
+      const user = new User(input);
+      return await user.save();
+    } catch (error) {
+      throw new Error('Error creating user');
+    }
   },
+
   updateUser: async ({ id, input }) => {
-    return await User.findByIdAndUpdate(id, input, { new: true });
+    try {
+      return await User.findByIdAndUpdate(id, input, { new: true });
+    } catch (error) {
+      throw new Error('Error updating user');
+    }
   },
+
   deleteUser: async ({ id }) => {
-    await User.findByIdAndDelete(id);
-    return true;
+    try {
+      await User.findByIdAndDelete(id);
+      return true;
+    } catch (error) {
+      throw new Error('Error deleting user');
+    }
   },
+
+  // Product Mutation Resolvers
   createProduct: async ({ input }) => {
-    const product = new Product(input);
-    return await product.save();
+    try {
+      const product = new Product(input);
+      return await product.save();
+    } catch (error) {
+      throw new Error('Error creating product');
+    }
   },
+
   updateProduct: async ({ id, input }) => {
-    return await Product.findByIdAndUpdate(id, input, { new: true });
+    try {
+      return await Product.findByIdAndUpdate(id, input, { new: true });
+    } catch (error) {
+      throw new Error('Error updating product');
+    }
   },
+
   deleteProduct: async ({ id }) => {
-    await Product.findByIdAndDelete(id);
-    return true;
+    try {
+      await Product.findByIdAndDelete(id);
+      return true;
+    } catch (error) {
+      throw new Error('Error deleting product');
+    }
   }
 };
 
-module.exports = resolvers; 
+module.exports = root; 

@@ -13,22 +13,29 @@ exports.getProducts = async (req, res) => {
 
 // GET Single Product by ID (Public)
 exports.getProductById = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid product ID format" });
-      }
-  
-      const product = await Product.findById(id);
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-  
-      res.json(product);
-    } catch (error) {
-      res.status(500).json({ error: "Internal server error", details: error.message });
+  try {
+    const { id } = req.params;
+    console.log('Attempting to get product by ID:', id); // Debug log
+
+    if (id === 'search') {
+      console.log('Search was caught by ID route!'); // Debug log
+      return res.status(400).json({ error: 'Invalid route - use /search endpoint' });
     }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid product ID format' });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error('Error in getProductById:', error);
+    res.status(500).json({ error: 'Failed to get product' });
+  }
 };
   
 
@@ -92,4 +99,48 @@ exports.deleteProduct = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: "Failed to delete product" });
     }
+};
+
+// GET Products by Name
+exports.getProductsByName = async (req, res) => {
+  try {
+    const { name } = req.query;
+    console.log('Searching by name:', name); // Debug log
+
+    if (!name) {
+      return res.status(400).json({ error: 'Name search term is required' });
+    }
+
+    const products = await Product.find({
+      name: { $regex: name, $options: 'i' }
+    });
+    
+    console.log(`Found ${products.length} products matching name:`, name);
+    res.json(products);
+  } catch (error) {
+    console.error('Name search error:', error);
+    res.status(500).json({ error: "Failed to search products by name" });
+  }
+};
+
+// GET Products by Description
+exports.getProductsByDescription = async (req, res) => {
+  try {
+    const { description } = req.query;
+    console.log('Searching by description:', description); // Debug log
+
+    if (!description) {
+      return res.status(400).json({ error: 'Description search term is required' });
+    }
+
+    const products = await Product.find({
+      description: { $regex: description, $options: 'i' }
+    });
+    
+    console.log(`Found ${products.length} products matching description:`, description);
+    res.json(products);
+  } catch (error) {
+    console.error('Description search error:', error);
+    res.status(500).json({ error: "Failed to search products by description" });
+  }
 };
