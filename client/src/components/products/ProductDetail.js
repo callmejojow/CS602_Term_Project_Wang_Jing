@@ -8,11 +8,14 @@ import {
   Paper,
   Divider,
   Stack,
-  Alert
+  Alert,
+  TextField,
+  Snackbar
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useCart } from '../../context/CartContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -20,6 +23,9 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,6 +50,23 @@ const ProductDetail = () => {
   if (!product) return <Alert severity="info">Product not found</Alert>;
 
   const imageUrl = `http://localhost:3000${product.image}`;
+
+  const handleQuantityChange = (event) => {
+    const value = parseInt(event.target.value) || 0;
+    setQuantity(value);
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(product._id, quantity);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
+  };
+
+  // Determine if quantity exceeds stock
+  const isQuantityInvalid = quantity > product.stock;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -98,18 +121,62 @@ const ProductDetail = () => {
                 {product.description}
               </Typography>
 
-              <Button 
-                variant="contained" 
-                size="large"
-                disabled={product.stock === 0}
-                sx={{ mt: 2 }}
-              >
-                Add to Cart
-              </Button>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <TextField
+                  type="number"
+                  label="Quantity"
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  InputProps={{ 
+                    inputProps: { min: 1 }
+                  }}
+                  size="small"
+                  sx={{ width: 100 }}
+                />
+                <Button 
+                  variant="contained" 
+                  color="primary"
+                  onClick={handleAddToCart}
+                  size="large"
+                  disabled={product.stock === 0 || isQuantityInvalid}
+                >
+                  {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                </Button>
+              </Box>
+
+              {/* Stock availability message */}
+              {isQuantityInvalid ? (
+                <Typography variant="body2" color="error">
+                  Only {product.stock} items available
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {product.stock > 0 
+                    ? `${product.stock} items in stock`
+                    : 'Currently out of stock'
+                  }
+                </Typography>
+              )}
             </Stack>
           </Grid>
         </Grid>
       </Paper>
+
+      {/* Success Message */}
+      <Snackbar 
+        open={showSuccess} 
+        autoHideDuration={3000} 
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setShowSuccess(false)} 
+          severity="success" 
+          sx={{ width: '100%' }}
+        >
+          Product added to cart successfully!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
