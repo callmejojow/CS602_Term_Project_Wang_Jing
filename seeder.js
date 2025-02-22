@@ -68,13 +68,6 @@ const products = [
     image: "/src/assets/mouse.png"
   },
   {
-    name: "External SSD",
-    description: "1TB portable solid-state drive",
-    price: 159.99,
-    stock: 20,
-    image: "/src/assets/ssd.png"
-  },
-  {
     name: "Webcam",
     description: "1080p HD webcam with microphone",
     price: 69.99,
@@ -87,69 +80,6 @@ const products = [
     price: 399.99,
     stock: 8,
     image: "/src/assets/gpu.png"
-  },
-  {
-    name: "Gaming Chair",
-    description: "Ergonomic gaming chair with lumbar support",
-    price: 299.99,
-    stock: 12,
-    image: "/src/assets/chair.png"
-  },
-  {
-    name: "USB-C Hub",
-    description: "7-in-1 USB-C hub with HDMI",
-    price: 49.99,
-    stock: 45,
-    image: "/src/assets/usb-hub.png"
-  },
-  {
-    name: "Gaming Headset",
-    description: "7.1 surround sound gaming headset",
-    price: 89.99,
-    stock: 30,
-    image: "/src/assets/headset.png"
-  },
-  {
-    name: "RAM Kit",
-    description: "32GB DDR4 RAM kit (2x16GB)",
-    price: 149.99,
-    stock: 25,
-    image: "/src/assets/ram.png"
-  },
-  {
-    name: "CPU Cooler",
-    description: "RGB liquid CPU cooler",
-    price: 129.99,
-    stock: 15,
-    image: "/src/assets/cpu-cooler.png"
-  },
-  {
-    name: "PC Case",
-    description: "Mid-tower ATX case with tempered glass",
-    price: 89.99,
-    stock: 18,
-    image: "/src/assets/pc-case.png"
-  },
-  {
-    name: "Power Supply",
-    description: "750W 80+ Gold certified PSU",
-    price: 119.99,
-    stock: 22,
-    image: "/src/assets/psu.png"
-  },
-  {
-    name: "Gaming Console",
-    description: "Next-gen gaming console with 4K support",
-    price: 499.99,
-    stock: 10,
-    image: "/src/assets/console.png"
-  },
-  {
-    name: "Bluetooth Speaker",
-    description: "Portable waterproof bluetooth speaker",
-    price: 79.99,
-    stock: 40,
-    image: "/src/assets/speaker.png"
   },
   {
     name: "Tablet",
