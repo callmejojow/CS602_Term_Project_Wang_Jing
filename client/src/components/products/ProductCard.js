@@ -10,7 +10,11 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
+  console.log('Product in card:', product);
   const navigate = useNavigate();
+  
+  // Construct the full image URL
+  const imageUrl = `http://localhost:3000${product.image}` || 'https://via.placeholder.com/200';
 
   return (
     <Card 
@@ -28,21 +32,25 @@ const ProductCard = ({ product }) => {
       <CardMedia
         component="img"
         height="200"
-        image={product.image || 'https://via.placeholder.com/200'}
+        image={imageUrl}
         alt={product.name}
+        sx={{ objectFit: 'contain', p: 2 }} 
       />
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h6" component="h2">
           {product.name}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {product.description}
         </Typography>
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6" color="primary">
             ${product.price?.toFixed(2)}
           </Typography>
-          <Typography variant="body2" color={product.stock > 0 ? 'success.main' : 'error.main'}>
+          <Typography 
+            variant="body2" 
+            color={product.stock > 0 ? 'success.main' : 'error.main'}
+          >
             {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
           </Typography>
         </Box>

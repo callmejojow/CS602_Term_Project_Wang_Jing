@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Grid } from '@mui/material';
 import ProductCard from './ProductCard';
 
