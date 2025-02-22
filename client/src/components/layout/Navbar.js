@@ -1,4 +1,4 @@
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -9,7 +9,13 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');  // Redirect to home page after logout
+  };
 
   return (
     <AppBar position="static">
@@ -29,7 +35,17 @@ const Navbar = () => {
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {user ? (
-            <Button color="inherit">Logout</Button>
+            <>
+              <Typography sx={{ mr: 2 }}>
+                Welcome, {user.name || user.email}
+              </Typography>
+              <Button 
+                color="inherit" 
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </>
           ) : (
             <>
               <Button 

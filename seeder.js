@@ -100,34 +100,27 @@ const products = [
 
 const seedDatabase = async () => {
   try {
-    // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connected to MongoDB...');
+    console.log('Current database:', mongoose.connection.db.databaseName);
 
     // Clear existing data
     await User.deleteMany({});
     await Product.deleteMany({});
     console.log('Cleared existing data...');
 
-    try {
-      const hashedUsers = await Promise.all(
-        users.map(async (user) => {
-          const hashedPassword = await bcrypt.hash(user.password, 10);
-          console.log(`Hashed password created for ${user.email}`);
-          return {
-            ...user,
-            password: hashedPassword
-          };
-        })
-      );
+    // Create users using the User model's pre-save middleware
+    const createdUsers = await Promise.all(
+      users.map(async (userData) => {
+        const user = new User(userData);
+        return user.save(); // This will trigger the pre-save middleware
+      })
+    );
 
-      console.log('About to create users:', hashedUsers);
-      const createdUsers = await User.create(hashedUsers);
-      console.log('Users created successfully:', createdUsers);
-    } catch (userError) {
-      console.error('Error creating users:', userError);
-      throw userError;
-    }
+    console.log('Users created:');
+    createdUsers.forEach(user => {
+      console.log(`- ${user.email} (${user.role})`);
+    });
 
     // Seed products
     try {
