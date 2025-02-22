@@ -35,13 +35,15 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (productId) => {
     setLoading(true);
-    setError(null);
     try {
+      console.log('Removing product:', productId); // Debug log
       const response = await axios.delete(`/cart/remove/${productId}`);
+      
+      console.log('Remove response:', response.data);
       setCart(response.data);
-      return response.data;
     } catch (error) {
-      handleError(error, 'remove from cart');
+      console.error('Remove error:', error);
+      throw error;
     } finally {
       setLoading(false);
     }

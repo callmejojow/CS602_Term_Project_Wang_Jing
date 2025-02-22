@@ -25,29 +25,37 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
 
   const imageUrl = `http://localhost:3000${item.product.image}`;
 
-  const handleQuantityChange = async (e) => {
+  const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
     if (!value || value < 1) return;
-    
     setQuantity(value);
     setError('');
+  };
 
-    // Validate quantity
-    if (value > item.product.stock) {
+  const handleUpdateQuantity = async () => {
+    if (!quantity || quantity < 1) {
+      setError('Please enter a valid quantity');
+      return;
+    }
+    
+    if (quantity > item.product.stock) {
       setError(`Only ${item.product.stock} items available`);
+      setQuantity(item.quantity); // Reset to previous quantity
       return;
     }
 
-    // Update cart
-    setIsUpdating(true);
-    try {
-      await onUpdateQuantity(item.product._id, value);
-    } catch (error) {
-      console.error('Failed to update:', error);
-      setQuantity(item.quantity); // Reset to previous quantity
-      setError('Failed to update quantity');
-    } finally {
-      setIsUpdating(false);
+    // Only update if quantity actually changed
+    if (quantity !== item.quantity) {
+      setIsUpdating(true);
+      try {
+        await onUpdateQuantity(item.product._id, quantity);
+      } catch (error) {
+        console.error('Failed to update:', error);
+        setQuantity(item.quantity); // Reset to previous quantity
+        setError('Failed to update quantity');
+      } finally {
+        setIsUpdating(false);
+      }
     }
   };
 
@@ -78,6 +86,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
                     size="small"
                     value={quantity}
                     onChange={handleQuantityChange}
+                    onBlur={handleUpdateQuantity}
                     InputProps={{ 
                       inputProps: { min: 1 }
                     }}
@@ -126,7 +135,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
           <Button onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
           <Button onClick={() => {
             setShowConfirmDialog(false);
-            onRemove(item._id);
+            onRemove(item.product._id);
           }} color="error" autoFocus>
             Remove
           </Button>
