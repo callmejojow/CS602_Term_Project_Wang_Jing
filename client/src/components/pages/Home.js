@@ -25,7 +25,7 @@ const Home = () => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 2 }}>
+    <Container maxWidth="lg" sx={{ mt: 12 }}>
       <Typography variant="h3" gutterBottom align="center">
         Jing's Gizmo Trove
       </Typography>

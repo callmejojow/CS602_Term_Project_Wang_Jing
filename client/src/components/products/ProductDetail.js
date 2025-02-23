@@ -69,7 +69,7 @@ const ProductDetail = () => {
   const isQuantityInvalid = quantity > product.stock;
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 12, mb: 4 }}>
       <Button 
         onClick={() => navigate(-1)} 
         sx={{ mb: 2 }}

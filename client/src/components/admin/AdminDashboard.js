@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import ProductManagement from './products/ProductManagement';
+import OrderManagement from './orders/OrderManagement';
 
 const AdminDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState('Products'); // Default to Products
@@ -22,7 +23,7 @@ const AdminDashboard = () => {
   const menuItems = [
     { text: 'Products', icon: <InventoryIcon />, component: <ProductManagement /> },
     { text: 'Customers', icon: <PeopleIcon />, component: null }, // Will add later
-    { text: 'Orders', icon: <OrdersIcon />, component: null } // Will add later
+    { text: 'Orders', icon: <OrdersIcon />, component: <OrderManagement /> }
   ];
 
   const handleMenuSelect = (menuText) => {
@@ -41,7 +42,6 @@ const AdminDashboard = () => {
             boxSizing: 'border-box',
             top: '64px',
             height: 'calc(100% - 64px)',
-            zIndex: 3
           },
         }}
       >
