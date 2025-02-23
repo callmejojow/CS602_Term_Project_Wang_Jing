@@ -89,6 +89,22 @@ export const AuthProvider = ({ children, onLogin }) => {
     }
   }, [onLogin]);
 
+  const updateProfile = async (userData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.put('/auth/profile', userData);
+      setUser(response.data.user);
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to update profile';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -97,7 +113,8 @@ export const AuthProvider = ({ children, onLogin }) => {
       login,
       logout,
       register,
-      checkAuth
+      checkAuth,
+      updateProfile
     }}>
       {children}
     </AuthContext.Provider>
