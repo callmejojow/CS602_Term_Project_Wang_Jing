@@ -25,7 +25,7 @@ const OrderDetail = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await axios.get(`/api/orders/${orderId}`);
+        const response = await axios.get(`/orders/${orderId}`);
         setOrder(response.data);
       } catch (error) {
         console.error('Failed to fetch order:', error);
@@ -85,7 +85,7 @@ const OrderDetail = () => {
             <ListItem key={item._id}>
               <ListItemAvatar>
                 <Avatar 
-                  src={`/uploads/${item.product.image}`}
+                  src={`http://localhost:3000${item.product.image}`}
                   alt={item.product.name}
                   variant="square"
                 />
@@ -98,9 +98,6 @@ const OrderDetail = () => {
                       Quantity: {item.quantity}
                     </Typography>
                     <br />
-                    <Typography component="span" variant="body2">
-                      Price: ${item.price.toFixed(2)}
-                    </Typography>
                   </>
                 }
               />
@@ -112,7 +109,7 @@ const OrderDetail = () => {
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Typography variant="h6">
-            Total: ${order.total.toFixed(2)}
+            Total: ${order.totalAmount?.toFixed(2)}
           </Typography>
         </Box>
       </Paper>
