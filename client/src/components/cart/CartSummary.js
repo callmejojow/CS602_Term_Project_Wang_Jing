@@ -12,14 +12,12 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { useCart } from '../../context/CartContext';
-import { useNavigate } from 'react-router-dom';
 
 const CartSummary = ({ items, calculateTotal }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const { clearCart } = useCart();
-  const navigate = useNavigate();
   
   const subtotal = items.reduce((total, item) => {
     return total + (item.product.price * item.quantity);

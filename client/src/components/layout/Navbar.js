@@ -32,7 +32,7 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar>
         <Typography 
           variant="h6" 
@@ -57,6 +57,17 @@ const Navbar = () => {
         </Button>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* Show Admin Dashboard only if user is admin */}
+          {user?.role === 'admin' && (
+            <Button 
+              color="inherit" 
+              component={RouterLink} 
+              to="/admin"
+            >
+              Admin Dashboard
+            </Button>
+          )}
+          
           <IconButton 
             color="inherit" 
             onClick={handleCartClick}

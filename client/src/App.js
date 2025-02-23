@@ -10,7 +10,7 @@ import Navbar from './components/layout/Navbar';
 import Profile from './components/profile/Profile';
 import OrderDetail from './components/orders/OrderDetail';
 import PrivateRoute from './components/common/PrivateRoute';
-//import AdminDashboard from './components/admin/AdminDashboard';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 
 function App() {
@@ -49,14 +49,14 @@ function App() {
               } 
             />
             {/* Admin routes */}
-            {/* <Route 
+            <Route 
               path="/admin/*" 
               element={
                 <PrivateRoute adminOnly>
                   <AdminDashboard />
                 </PrivateRoute>
               } 
-            /> */}
+            />
           </Routes>
         </CartProvider>
       </AuthProvider>

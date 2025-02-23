@@ -60,45 +60,40 @@ exports.createProduct = async (req, res) => {
 
 // PUT Update a Product (Admin Only)
 exports.updateProduct = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updates = req.body;
-  
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid product ID format" });
-      }
-  
-      const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });
-  
-      if (!updatedProduct) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-  
-      res.json(updatedProduct);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update product" });
+  try {
+    const { name, description, price, stock } = req.body;
+    
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { name, description, price, stock },
+      { new: true, runValidators: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+
+    res.json(product);
+  } catch (error) {
+    console.error('Update product error:', error);
+    res.status(500).json({ message: 'Failed to update product' });
+  }
 };
 
 // DELETE Remove a Product (Admin Only)
 exports.deleteProduct = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid product ID format" });
-      }
-  
-      const deletedProduct = await Product.findByIdAndDelete(id);
-  
-      if (!deletedProduct) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-  
-      res.json({ message: "Product deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete product" });
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Delete product error:', error);
+    res.status(500).json({ message: 'Failed to delete product' });
+  }
 };
 
 // GET Products by Name
