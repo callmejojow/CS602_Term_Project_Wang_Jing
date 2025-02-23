@@ -9,8 +9,7 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemText,
-  Button
+  ListItemText
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 
