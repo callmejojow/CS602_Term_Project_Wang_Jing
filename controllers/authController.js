@@ -71,3 +71,72 @@ exports.checkAuth = async (req, res) => {
     res.status(401).json({ message: 'Authentication failed' });
   }
 };
+
+// Get all users (Admin only)
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('-password') 
+      .sort('-createdAt');
+    res.json(users);
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+};
+
+// Update user role (Admin only)
+exports.updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const userId = req.params.id;
+
+    // Validate role
+    if (!['admin', 'customer'].includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // Prevent self-role modification
+    if (userId === req.user._id.toString()) {
+      return res.status(400).json({ error: "Cannot modify your own admin status" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ error: "Failed to update user role" });
+  }
+};
+
+// Delete user (Admin only)
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Prevent self-deletion
+    if (userId === req.user._id.toString()) {
+      return res.status(400).json({ error: "Cannot delete your own account" });
+    }
+
+    const user = await User.findByIdAndDelete(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+};

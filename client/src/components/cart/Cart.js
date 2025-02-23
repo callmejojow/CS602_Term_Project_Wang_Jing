@@ -32,7 +32,7 @@ const Cart = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 12, mb: 4 }}>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}

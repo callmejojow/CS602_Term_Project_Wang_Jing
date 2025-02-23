@@ -54,7 +54,7 @@ const OrderDetail = () => {
   if (!order) return <Typography>Order not found</Typography>;
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="md" sx={{ mt: 12, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="h4" gutterBottom>

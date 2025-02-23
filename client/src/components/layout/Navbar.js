@@ -32,7 +32,7 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="fixed">
+    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar>
         <Typography 
           variant="h6" 
@@ -95,13 +95,22 @@ const Navbar = () => {
               </Button>
             </>
           ) : (
-            <Button 
-              color="inherit" 
-              component={RouterLink} 
-              to="/login"
-            >
-              Login
-            </Button>
+            <>
+              <Button 
+                color="inherit" 
+                component={RouterLink} 
+                to="/login"
+              >
+                Login
+              </Button>
+              <Button 
+                color="inherit" 
+                component={RouterLink} 
+                to="/register"
+              >
+                Register
+              </Button>
+            </>
           )}
         </Box>
       </Toolbar>

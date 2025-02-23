@@ -16,8 +16,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 
 const ProductDetail = () => {
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -58,6 +60,10 @@ const ProductDetail = () => {
 
   const handleAddToCart = async () => {
     try {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
       await addToCart(product._id, quantity);
       setShowSuccess(true);
     } catch (error) {

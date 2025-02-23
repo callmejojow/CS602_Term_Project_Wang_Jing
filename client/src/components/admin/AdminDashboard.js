@@ -15,6 +15,7 @@ import {
 import { useState } from 'react';
 import ProductManagement from './products/ProductManagement';
 import OrderManagement from './orders/OrderManagement';
+import UserManagement from './users/UserManagement';
 
 const AdminDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState('Products'); // Default to Products
@@ -22,7 +23,7 @@ const AdminDashboard = () => {
 
   const menuItems = [
     { text: 'Products', icon: <InventoryIcon />, component: <ProductManagement /> },
-    { text: 'Customers', icon: <PeopleIcon />, component: null }, // Will add later
+    { text: 'Users', icon: <PeopleIcon />, component: <UserManagement /> },
     { text: 'Orders', icon: <OrdersIcon />, component: <OrderManagement /> }
   ];
 
