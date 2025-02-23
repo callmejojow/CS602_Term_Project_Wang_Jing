@@ -1,38 +1,33 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
-// You might want to set a base URL for all axios requests
 axios.defaults.baseURL = 'http://localhost:3000/api';
 
 export const AuthProvider = ({ children, onLogin }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const login = async (email, password) => {
+  const login = async (credentials) => {
     try {
-      console.log('Attempting login with:', { email, password }); // Debug log
-      const response = await axios.post('/auth/login', {
-        email,
-        password
-      });
-      console.log('Login response:', response.data); // Debug log
-
+      setLoading(true);
+      setError(null);
+      const response = await axios.post('/auth/login', credentials);
       const { token, user: userData } = response.data;
+      
+      // Set token in localStorage and axios headers
       localStorage.setItem('token', token);
-      setUser(userData);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Call the callback function after successful login
-      if (onLogin) await onLogin();
+      
+      setUser(userData);
       return response.data;
     } catch (error) {
-      console.error('Full error:', error); // Debug log
-      console.error('Login error:', error.response?.data || error.message);
-      setError(error.response?.data?.message || 'Failed to login');
+      setError(error.response?.data?.message || 'Login failed');
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,10 +61,12 @@ export const AuthProvider = ({ children, onLogin }) => {
   const logout = async () => {
     try {
       await axios.post('/auth/logout');
-      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
-      throw error;
+    } finally {
+      setUser(null);
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
     }
   };
 
@@ -88,6 +85,15 @@ export const AuthProvider = ({ children, onLogin }) => {
       setLoading(false);
     }
   }, [onLogin]);
+
+  // Hook to check token and restore user session
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // You might want to verify the token here
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{

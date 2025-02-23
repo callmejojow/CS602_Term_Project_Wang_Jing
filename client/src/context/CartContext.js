@@ -86,6 +86,19 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
+  const clearCart = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.delete('/cart/clear');
+      setCart({ items: [] });
+    } catch (error) {
+      handleError(error, 'clear cart');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getCartItemCount = () => {
     return cart.items.reduce((total, item) => total + item.quantity, 0);
   };
@@ -103,6 +116,7 @@ export const CartProvider = ({ children }) => {
       addToCart,
       removeFromCart,
       updateQuantity,
+      clearCart,
       calculateTotal,
       getCartItemCount
     }}>

@@ -9,7 +9,8 @@ const { isAuthenticated, isAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.use(isAuthenticated); // All order routes require authentication
+// Apply authentication middleware
+router.use(isAuthenticated);
 
 router.post('/', createOrder);
 router.get('/', getOrders);

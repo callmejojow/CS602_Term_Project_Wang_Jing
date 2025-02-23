@@ -48,3 +48,26 @@ exports.login = async (req, res) => {
 exports.getProfile = (req, res) => {
   res.json({ message: "Profile accessed successfully", user: req.user });
 };
+
+exports.logout = async (req, res) => {
+  try {
+    // With JWT, I don't need to do anything server-side
+    // Just send a success response
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error during logout' });
+  }
+};
+
+exports.checkAuth = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    res.json({ user });
+  } catch (error) {
+    console.error('Auth check error:', error);
+    res.status(401).json({ message: 'Authentication failed' });
+  }
+};

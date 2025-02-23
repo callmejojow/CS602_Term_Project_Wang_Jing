@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
   TextField,
   Button,
   Typography,
-  Link,
   Box,
   Alert
 } from '@mui/material';
@@ -17,43 +16,52 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
-
+  
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setError('');
     
     try {
-      await login(formData.email, formData.password);
-      navigate('/');
+      await login(formData);
+      // Redirect to the page they tried to visit or home
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      setError(err.response?.data?.message || 'Failed to login');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <Typography variant="h5" component="h1" gutterBottom>
           Login
         </Typography>
-
+        
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="Email"
@@ -64,7 +72,7 @@ const Login = () => {
             margin="normal"
             required
           />
-
+          
           <TextField
             fullWidth
             label="Password"
@@ -75,23 +83,18 @@ const Login = () => {
             margin="normal"
             required
           />
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Login
-          </Button>
-
-          <Typography align="center">
-            Don't have an account?{' '}
-            <Link component={RouterLink} to="/register">
-              Register here
-            </Link>
-          </Typography>
-        </Box>
+          
+          <Box sx={{ mt: 2 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={loading}
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
+          </Box>
+        </form>
       </Paper>
     </Container>
   );

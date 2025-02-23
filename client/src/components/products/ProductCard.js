@@ -10,7 +10,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-  console.log('Product in card:', product);
   const navigate = useNavigate();
   
   // Construct the full image URL
