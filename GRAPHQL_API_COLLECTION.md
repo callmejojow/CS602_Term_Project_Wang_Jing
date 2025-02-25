@@ -83,6 +83,76 @@
    }
    ```
 
+## Order Queries
+1. **Get Single Order**
+   ```graphql
+   query {
+     getOrder(id: "order_id_here") {
+       _id
+       user {
+         _id
+         name
+         email
+       }
+       items {
+         product {
+           _id
+           name
+           price
+         }
+         quantity
+         price
+       }
+       totalAmount
+       status
+       createdAt
+       updatedAt
+     }
+   }
+   ```
+
+2. **Get User Orders**
+   ```graphql
+   query {
+     getUserOrders {
+       _id
+       items {
+         product {
+           name
+           price
+         }
+         quantity
+       }
+       totalAmount
+       status
+       createdAt
+     }
+   }
+   ```
+
+3. **Get All Orders (Admin)**
+   ```graphql
+   query {
+     getAllOrders {
+       _id
+       user {
+         name
+         email
+       }
+       items {
+         product {
+           name
+         }
+         quantity
+         price
+       }
+       totalAmount
+       status
+       createdAt
+     }
+   }
+   ```
+
 ## User Mutations
 1. **Create User**
    ```graphql
@@ -170,6 +240,56 @@
    }
    ```
 
+## Order Mutations
+1. **Create Order**
+   ```graphql
+   mutation {
+     createOrder(input: {
+       items: [
+         {
+           productId: "product_id_here",
+           quantity: 2
+         }
+       ]
+     }) {
+       _id
+       items {
+         product {
+           name
+           price
+         }
+         quantity
+       }
+       totalAmount
+       status
+       createdAt
+     }
+   }
+   ```
+
+2. **Update Order Status (Admin)**
+   ```graphql
+   mutation {
+     updateOrderStatus(
+       id: "order_id_here",
+       input: {
+         status: COMPLETED  # PENDING, PROCESSING, COMPLETED, CANCELLED
+       }
+     ) {
+       _id
+       status
+       updatedAt
+     }
+   }
+   ```
+
+3. **Delete Order (Admin)**
+   ```graphql
+   mutation {
+     deleteOrder(id: "order_id_here")
+   }
+   ```
+
 ## Testing Notes
 1. GraphQL endpoint: `http://localhost:3000/graphql`
 
@@ -189,9 +309,20 @@
    {
      "id": "actual_id_here",
      "input": {
-       "name": "actual_name_here"
+       "items": [
+         {
+           "productId": "actual_product_id",
+           "quantity": 1
+         }
+       ]
      }
    }
    ```
 
-5. All IDs should be valid MongoDB ObjectIds 
+5. All IDs should be valid MongoDB ObjectIds
+
+6. Order Status Values:
+   - PENDING
+   - PROCESSING
+   - COMPLETED
+   - CANCELLED 

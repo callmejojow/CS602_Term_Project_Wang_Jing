@@ -18,6 +18,42 @@ const schema = buildSchema(`
     price: Float!
     stock: Int!
     image: String
+  } 
+
+  type Order {
+    _id: ID!
+    user: User!
+    items: [OrderItem!]!
+    totalAmount: Float!
+    status: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type OrderItem {
+    product: Product!
+    quantity: Int!
+    price: Float!
+  }   
+
+  enum OrderStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    CANCELLED
+  }
+
+  input OrderItemInput {
+    productId: ID!
+    quantity: Int!
+  }
+
+  input CreateOrderInput {
+    items: [OrderItemInput!]!
+  }
+
+  input UpdateOrderStatusInput {
+    status: OrderStatus!
   }
 
   type Query {
@@ -30,6 +66,11 @@ const schema = buildSchema(`
     getProduct(id: ID!): Product
     searchProductsByName(name: String!): [Product]
     searchProductsByDescription(description: String!): [Product]
+
+    # Order Queries
+    getOrder(id: ID!): Order
+    getUserOrders: [Order!]!
+    getAllOrders: [Order!]!
   }
 
   input UserInput {
@@ -56,6 +97,11 @@ const schema = buildSchema(`
     createProduct(input: ProductInput): Product
     updateProduct(id: ID!, input: ProductInput): Product
     deleteProduct(id: ID!): Boolean
+
+    # Order Mutations
+    createOrder(input: CreateOrderInput!): Order!
+    updateOrderStatus(id: ID!, input: UpdateOrderStatusInput!): Order!
+    deleteOrder(id: ID!): Boolean!
   }
 `);
 
