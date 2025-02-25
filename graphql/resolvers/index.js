@@ -334,22 +334,16 @@ const root = {
         cart = new Cart({
           user: context.user.userId,
           items: [],
-          totalAmount: 0.0  // Explicitly set to 0.0
         });
         await cart.save();
         cart = await Cart.findById(cart._id)
           .populate('user')
           .populate('items.product');
       }
-
-      // Ensure totalAmount is always a number
-      cart.totalAmount = cart.totalAmount || 0.0;
-
       return {
         _id: cart._id,
         user: cart.user,
         items: cart.items || [],
-        totalAmount: cart.totalAmount
       };
     } catch (error) {
       throw new Error('Error fetching cart: ' + error.message);
@@ -372,8 +366,7 @@ const root = {
       if (!cart) {
         cart = new Cart({
           user: context.user.userId,
-          items: [],
-          totalAmount: 0
+          items: []
         });
       }
 
@@ -389,8 +382,6 @@ const root = {
           quantity
         });
       }
-
-      cart.totalAmount = await calculateCartTotal(cart.items);
       await cart.save();
       
       return await cart.populate('user').populate('items.product');
@@ -417,7 +408,6 @@ const root = {
       if (itemIndex === -1) throw new Error('Item not in cart');
 
       cart.items[itemIndex].quantity = quantity;
-      cart.totalAmount = await calculateCartTotal(cart.items);
       await cart.save();
 
       return await cart.populate('user').populate('items.product');
@@ -436,7 +426,6 @@ const root = {
       cart.items = cart.items.filter(
         item => item.product.toString() !== productId
       );
-      cart.totalAmount = await calculateCartTotal(cart.items);
       await cart.save();
 
       return await cart.populate('user').populate('items.product');
@@ -453,7 +442,6 @@ const root = {
       if (!cart) throw new Error('Cart not found');
 
       cart.items = [];
-      cart.totalAmount = 0;
       await cart.save();
 
       return await cart.populate('user').populate('items.product');
@@ -486,7 +474,6 @@ const root = {
           product: item.product._id,
           quantity: item.quantity
         })),
-        totalAmount: cart.totalAmount,
         status: 'PENDING'
       });
 
@@ -501,7 +488,6 @@ const root = {
       
       // Clear cart
       cart.items = [];
-      cart.totalAmount = 0;
       await cart.save();
 
       return await order.populate('user').populate('items.product');
@@ -510,17 +496,5 @@ const root = {
     }
   }
 };
-
-// Helper function to calculate cart total
-async function calculateCartTotal(items) {
-  let total = 0;
-  for (const item of items) {
-    const product = await Product.findById(item.product);
-    if (product) {
-      total += product.price * item.quantity;
-    }
-  }
-  return total;
-}
 
 module.exports = root; 

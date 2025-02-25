@@ -100,7 +100,6 @@ const schema = buildSchema(`
     _id: ID!
     user: User!
     items: [CartItem!]!
-    totalAmount: Float!
   }
 
   type CartItem {
