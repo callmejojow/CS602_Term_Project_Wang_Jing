@@ -63,13 +63,15 @@ A full-stack e-commerce platform built with the MERN stack (MongoDB, Express.js,
 
 2. **Backend Setup**
    ```bash
-   cd server
    npm install
    
    # Create .env file with:
    PORT=3000
    MONGODB_URI=mongodb://127.0.0.1:27017/shopping-cart
    JWT_SECRET=30751f54e67b18027578ef18779ff053448ea3273a6b9a7a236e6331680e5512
+
+    # Seed initial data (products and admin user)
+   node seed.js
    ```
 
 3. **Frontend Setup**
