@@ -3,12 +3,17 @@ const { buildSchema } = require('graphql');
 const schema = buildSchema(`
   type User {
     _id: ID!
-    email: String!
-    password: String!
-    name: String
-    role: String
-    createdAt: String
-    updatedAt: String
+    email: String
+    password: String
+    name: String!
+    role: UserRole!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  enum UserRole {
+    admin
+    customer
   }
 
   type Product {
@@ -18,6 +23,8 @@ const schema = buildSchema(`
     price: Float!
     stock: Int!
     image: String
+    createdAt: String!
+    updatedAt: String!
   } 
 
   type Order {
@@ -25,7 +32,7 @@ const schema = buildSchema(`
     user: User!
     items: [OrderItem!]!
     totalAmount: Float!
-    status: String!
+    status: OrderStatus!
     createdAt: String!
     updatedAt: String!
   }
@@ -56,26 +63,15 @@ const schema = buildSchema(`
     status: OrderStatus!
   }
 
-  type Query {
-    # User Queries
-    getUser(id: ID!): User
-    getAllUsers: [User]
-    
-    # Product Queries
-    getAllProducts: [Product]
-    getProduct(id: ID!): Product
-    searchProductsByName(name: String!): [Product]
-    searchProductsByDescription(description: String!): [Product]
-
-    # Order Queries
-    getOrder(id: ID!): Order
-    getUserOrders: [Order!]!
-    getAllOrders: [Order!]!
-  }
-
   input UserInput {
     email: String!
     password: String!
+    name: String
+  }
+
+  input UpdateUserInput {
+    email: String
+    password: String
     name: String
   }
 
@@ -87,21 +83,61 @@ const schema = buildSchema(`
     image: String
   }
 
+  input UpdateProductInput {
+    name: String
+    description: String
+    price: Float
+    stock: Int
+    image: String
+  }
+
+  type AuthData {
+    userId: ID!
+    token: String!
+    tokenExpiration: Int!
+    role: UserRole!
+  }
+
+  type Query {
+    # User Queries
+    getUser(id: ID!): User
+    getAllUsers: [User!]!
+    me: User
+    
+    # Product Queries
+    getAllProducts: [Product!]!
+    getProduct(id: ID!): Product
+    searchProductsByName(name: String!): [Product!]!
+    searchProductsByDescription(description: String!): [Product!]!
+
+    # Order Queries
+    getOrder(id: ID!): Order
+    getUserOrders: [Order!]!
+    getAllOrders: [Order!]!
+  }
+
   type Mutation {
+    # Auth Mutations
+    login(email: String!, password: String!): AuthData!
+    
     # User Mutations
-    createUser(input: UserInput): User
-    updateUser(id: ID!, input: UserInput): User
-    deleteUser(id: ID!): Boolean
+    createUser(input: UserInput!): User!
+    updateUser(id: ID!, input: UpdateUserInput!): User!
+    deleteUser(id: ID!): Boolean!
     
     # Product Mutations
-    createProduct(input: ProductInput): Product
-    updateProduct(id: ID!, input: ProductInput): Product
-    deleteProduct(id: ID!): Boolean
+    createProduct(input: ProductInput!): Product!
+    updateProduct(id: ID!, input: UpdateProductInput!): Product!
+    deleteProduct(id: ID!): Boolean!
 
     # Order Mutations
     createOrder(input: CreateOrderInput!): Order!
     updateOrderStatus(id: ID!, input: UpdateOrderStatusInput!): Order!
     deleteOrder(id: ID!): Boolean!
+  }
+
+  type Subscription {
+    orderStatusChanged: Order!
   }
 `);
 
