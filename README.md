@@ -71,7 +71,7 @@ A full-stack e-commerce platform built with the MERN stack (MongoDB, Express.js,
    JWT_SECRET=30751f54e67b18027578ef18779ff053448ea3273a6b9a7a236e6331680e5512
 
     # Seed initial data (products and admin user)
-   node seed.js
+   node seeder.js
    ```
 
 3. **Frontend Setup**
