@@ -92,14 +92,13 @@ A full-stack e-commerce platform built with the MERN stack (MongoDB, Express.js,
 
 2. **Start Backend Server**
    ```bash
-   cd server
-   npm start
+   npm runstart
    ```
 
 3. **Start Frontend Development Server**
    ```bash
    cd client
-   npm start
+   npm run start
    ```
 
 The application will be available at:
