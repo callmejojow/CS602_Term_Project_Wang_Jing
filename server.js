@@ -4,8 +4,9 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const passport = require('./config/passport');
 const { graphqlHTTP } = require('express-graphql');
-const schema = require('./graphql/schema/index');
-const root = require('./graphql/resolvers/index');
+const schema = require('./graphql/schema');
+const resolvers = require('./graphql/resolvers');
+const jwt = require('jsonwebtoken');
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -23,6 +24,23 @@ app.use(cors({
 }));
 app.use(passport.initialize());
 app.use('/src', express.static('src')); // Serve static files from src directory
+
+// Authentication middleware
+const authMiddleware = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split('Bearer ')[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+    } catch (err) {
+      console.error('Token verification failed:', err.message);
+    }
+  }
+  next();
+};
+
+app.use(authMiddleware);
 
 // Debug middleware to see all incoming requests
 app.use((req, res, next) => {
@@ -50,11 +68,29 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes); 
 
 // GraphQL endpoint
-app.use('/graphql', graphqlHTTP({
+app.use('/graphql', graphqlHTTP((req) => ({
   schema: schema,
-  rootValue: root,
-  graphiql: true
-}));
+  rootValue: resolvers,
+  graphiql: {
+    headerEditorEnabled: true,
+    defaultQuery: `# Welcome to Jing's Gizmo Trove API
+# First, try logging in:
+mutation {
+  login(email: "admin@metcs.com", password: "admin123") {
+    token
+    userId
+    role
+  }
+}
+
+# Then copy the token and add it to HTTP HEADERS:
+# {
+#   "Authorization": "Bearer your_token_here"
+# }
+`,
+  },
+  context: { user: req.user }, // Pass the user from auth middleware to resolvers
+})));
 
 // Start Server
 const PORT = process.env.PORT;

@@ -32,7 +32,7 @@ const schema = buildSchema(`
     user: User!
     items: [OrderItem!]!
     totalAmount: Float!
-    status: OrderStatus!
+    status: String!
     createdAt: String!
     updatedAt: String!
   }
@@ -40,7 +40,6 @@ const schema = buildSchema(`
   type OrderItem {
     product: Product!
     quantity: Int!
-    price: Float!
   }   
 
   enum OrderStatus {

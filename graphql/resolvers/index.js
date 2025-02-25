@@ -189,7 +189,7 @@ const root = {
       
       return order;
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error('Error fetching order: ' + error.message);
     }
   },
 
@@ -212,10 +212,12 @@ const root = {
         throw new Error('Not authorized');
       }
       
-      return await Order.find({})
+      const orders = await Order.find({})
         .populate('user')
         .populate('items.product')
         .sort('-createdAt');
+
+      return orders;
     } catch (error) {
       throw new Error('Error fetching all orders');
     }
@@ -240,8 +242,7 @@ const root = {
         totalAmount += product.price * item.quantity;
         orderItems.push({
           product: item.productId,
-          quantity: item.quantity,
-          price: product.price
+          quantity: item.quantity
         });
 
         // Update stock
@@ -258,9 +259,11 @@ const root = {
       });
 
       await order.save();
-      return await order.populate('user').populate('items.product');
+      return await order
+        .populate('user')
+        .populate('items.product');
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error('Error creating order: ' + error.message);
     }
   },
 
@@ -285,9 +288,11 @@ const root = {
       order.status = input.status;
       await order.save();
       
-      return await order.populate('user').populate('items.product');
+      return await order
+        .populate('user')
+        .populate('items.product');
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error('Error updating order status: ' + error.message);
     }
   },
 
@@ -296,10 +301,40 @@ const root = {
       if (!context.user || context.user.role !== 'admin') {
         throw new Error('Not authorized');
       }
-      const result = await Order.findByIdAndDelete(id);
-      return !!result;
+
+      const order = await Order.findByIdAndDelete(id);
+      return !!order;
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error('Error deleting order');
+    }
+  },
+
+  // Add login mutation resolver
+  login: async ({ email, password }) => {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        throw new Error('Invalid password');
+      }
+
+      const token = jwt.sign(
+        { userId: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      return {
+        userId: user._id,
+        token: token,
+        role: user.role
+      };
+    } catch (error) {
+      throw new Error('Error logging in: ' + error.message);
     }
   }
 };
