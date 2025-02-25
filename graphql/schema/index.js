@@ -96,6 +96,23 @@ const schema = buildSchema(`
     role: UserRole!
   }
 
+  type Cart {
+    _id: ID!
+    user: User!
+    items: [CartItem!]!
+    totalAmount: Float!
+  }
+
+  type CartItem {
+    product: Product!
+    quantity: Int!
+  }
+
+  input CartItemInput {
+    productId: ID!
+    quantity: Int!
+  }
+
   type Query {
     # User Queries
     getUser(id: ID!): User
@@ -111,6 +128,9 @@ const schema = buildSchema(`
     getOrder(id: ID!): Order
     getUserOrders: [Order!]!
     getAllOrders: [Order!]!
+
+    # Cart Queries
+    getCart: Cart
   }
 
   type Mutation {
@@ -131,6 +151,13 @@ const schema = buildSchema(`
     createOrder(input: CreateOrderInput!): Order!
     updateOrderStatus(id: ID!, input: UpdateOrderStatusInput!): Order!
     deleteOrder(id: ID!): Boolean!
+
+    # Cart Mutations
+    addToCart(input: CartItemInput!): Cart!
+    updateCartItem(productId: ID!, quantity: Int!): Cart!
+    removeFromCart(productId: ID!): Cart!
+    clearCart: Cart!
+    checkoutCart: Order!
   }
 `);
 

@@ -3,12 +3,13 @@ const User = require('../../models/User');
 const Order = require('../../models/Order');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Cart = require('../../models/Cart');
 
 const root = {
   // User Query Resolvers
   getUser: async ({ id }, context) => {
     try {
-      if (!context.user) throw new Error('Not authenticated');
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
       const user = await User.findById(id).select('-password');
       if (!user) throw new Error('User not found');
       return user;
@@ -19,9 +20,7 @@ const root = {
 
   getAllUsers: async (args, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
       return await User.find({}).select('-password');
     } catch (error) {
       throw new Error(error.message);
@@ -89,8 +88,8 @@ const root = {
 
   updateUser: async ({ id, input }, context) => {
     try {
-      if (!context.user) throw new Error('Not authenticated');
-      if (context.user.role !== 'admin' && context.user._id.toString() !== id) {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+      if (context.user.role !== 'admin' && context.user.userId !== id) {
         throw new Error('Not authorized');
       }
 
@@ -113,9 +112,7 @@ const root = {
 
   deleteUser: async ({ id }, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
 
       const result = await User.findByIdAndDelete(id);
       return !!result;
@@ -127,9 +124,7 @@ const root = {
   // Product Mutation Resolvers
   createProduct: async ({ input }, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
 
       const product = new Product(input);
       await product.save();
@@ -141,9 +136,7 @@ const root = {
 
   updateProduct: async ({ id, input }, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
 
       const product = await Product.findByIdAndUpdate(
         id,
@@ -160,9 +153,7 @@ const root = {
 
   deleteProduct: async ({ id }, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
 
       const result = await Product.findByIdAndDelete(id);
       return !!result;
@@ -174,7 +165,7 @@ const root = {
   // Order Query Resolvers
   getOrder: async ({ id }, context) => {
     try {
-      if (!context.user) throw new Error('Not authenticated');
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
       
       const order = await Order.findById(id)
         .populate('user')
@@ -182,8 +173,7 @@ const root = {
       
       if (!order) throw new Error('Order not found');
       
-      if (context.user.role !== 'admin' && 
-          order.user._id.toString() !== context.user._id.toString()) {
+      if (!context.user.isAdmin && order.user._id.toString() !== context.user.userId) {
         throw new Error('Not authorized');
       }
       
@@ -195,9 +185,9 @@ const root = {
 
   getUserOrders: async (args, context) => {
     try {
-      if (!context.user) throw new Error('Not authenticated');
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
       
-      return await Order.find({ user: context.user._id })
+      return await Order.find({ user: context.user.userId })
         .populate('user')
         .populate('items.product')
         .sort('-createdAt');
@@ -208,16 +198,12 @@ const root = {
 
   getAllOrders: async (args, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
       
-      const orders = await Order.find({})
+      return await Order.find({})
         .populate('user')
         .populate('items.product')
         .sort('-createdAt');
-
-      return orders;
     } catch (error) {
       throw new Error('Error fetching all orders');
     }
@@ -226,7 +212,7 @@ const root = {
   // Order Mutation Resolvers
   createOrder: async ({ input }, context) => {
     try {
-      if (!context.user) throw new Error('Not authenticated');
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
       
       let totalAmount = 0;
       const orderItems = [];
@@ -252,7 +238,7 @@ const root = {
       }
 
       const order = new Order({
-        user: context.user._id,
+        user: context.user.userId,
         items: orderItems,
         totalAmount,
         status: 'PENDING'
@@ -269,9 +255,7 @@ const root = {
 
   updateOrderStatus: async ({ id, input }, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
 
       const order = await Order.findById(id);
       if (!order) throw new Error('Order not found');
@@ -298,9 +282,7 @@ const root = {
 
   deleteOrder: async ({ id }, context) => {
     try {
-      if (!context.user || context.user.role !== 'admin') {
-        throw new Error('Not authorized');
-      }
+      if (!context.user.isAdmin) throw new Error('Not authorized');
 
       const order = await Order.findByIdAndDelete(id);
       return !!order;
@@ -336,7 +318,209 @@ const root = {
     } catch (error) {
       throw new Error('Error logging in: ' + error.message);
     }
+  },
+
+  // Cart Query Resolvers
+  getCart: async (args, context) => {
+    try {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+
+      let cart = await Cart.findOne({ user: context.user.userId })
+        .populate('user')
+        .populate('items.product');
+
+      if (!cart) {
+        // Create new cart with initialized values
+        cart = new Cart({
+          user: context.user.userId,
+          items: [],
+          totalAmount: 0.0  // Explicitly set to 0.0
+        });
+        await cart.save();
+        cart = await Cart.findById(cart._id)
+          .populate('user')
+          .populate('items.product');
+      }
+
+      // Ensure totalAmount is always a number
+      cart.totalAmount = cart.totalAmount || 0.0;
+
+      return {
+        _id: cart._id,
+        user: cart.user,
+        items: cart.items || [],
+        totalAmount: cart.totalAmount
+      };
+    } catch (error) {
+      throw new Error('Error fetching cart: ' + error.message);
+    }
+  },
+
+  // Cart Mutation Resolvers
+  addToCart: async ({ input }, context) => {
+    try {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+
+      const { productId, quantity } = input;
+      if (quantity <= 0) throw new Error('Quantity must be positive');
+
+      const product = await Product.findById(productId);
+      if (!product) throw new Error('Product not found');
+      if (product.stock < quantity) throw new Error('Insufficient stock');
+
+      let cart = await Cart.findOne({ user: context.user.userId });
+      if (!cart) {
+        cart = new Cart({
+          user: context.user.userId,
+          items: [],
+          totalAmount: 0
+        });
+      }
+
+      const existingItemIndex = cart.items.findIndex(
+        item => item.product.toString() === productId
+      );
+
+      if (existingItemIndex > -1) {
+        cart.items[existingItemIndex].quantity += quantity;
+      } else {
+        cart.items.push({
+          product: productId,
+          quantity
+        });
+      }
+
+      cart.totalAmount = await calculateCartTotal(cart.items);
+      await cart.save();
+      
+      return await cart.populate('user').populate('items.product');
+    } catch (error) {
+      throw new Error('Error adding to cart: ' + error.message);
+    }
+  },
+
+  updateCartItem: async ({ productId, quantity }, context) => {
+    try {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+      if (quantity <= 0) throw new Error('Quantity must be positive');
+
+      const product = await Product.findById(productId);
+      if (!product) throw new Error('Product not found');
+      if (product.stock < quantity) throw new Error('Insufficient stock');
+
+      const cart = await Cart.findOne({ user: context.user.userId });
+      if (!cart) throw new Error('Cart not found');
+
+      const itemIndex = cart.items.findIndex(
+        item => item.product.toString() === productId
+      );
+      if (itemIndex === -1) throw new Error('Item not in cart');
+
+      cart.items[itemIndex].quantity = quantity;
+      cart.totalAmount = await calculateCartTotal(cart.items);
+      await cart.save();
+
+      return await cart.populate('user').populate('items.product');
+    } catch (error) {
+      throw new Error('Error updating cart item: ' + error.message);
+    }
+  },
+
+  removeFromCart: async ({ productId }, context) => {
+    try {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+
+      const cart = await Cart.findOne({ user: context.user.userId });
+      if (!cart) throw new Error('Cart not found');
+
+      cart.items = cart.items.filter(
+        item => item.product.toString() !== productId
+      );
+      cart.totalAmount = await calculateCartTotal(cart.items);
+      await cart.save();
+
+      return await cart.populate('user').populate('items.product');
+    } catch (error) {
+      throw new Error('Error removing from cart: ' + error.message);
+    }
+  },
+
+  clearCart: async (args, context) => {
+    try {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+
+      const cart = await Cart.findOne({ user: context.user.userId });
+      if (!cart) throw new Error('Cart not found');
+
+      cart.items = [];
+      cart.totalAmount = 0;
+      await cart.save();
+
+      return await cart.populate('user').populate('items.product');
+    } catch (error) {
+      throw new Error('Error clearing cart: ' + error.message);
+    }
+  },
+
+  checkoutCart: async (args, context) => {
+    try {
+      if (!context.user.isAuthenticated) throw new Error('Not authenticated');
+
+      const cart = await Cart.findOne({ user: context.user.userId })
+        .populate('items.product');
+      if (!cart || cart.items.length === 0) {
+        throw new Error('Cart is empty');
+      }
+
+      // Verify stock availability
+      for (const item of cart.items) {
+        if (item.product.stock < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.product.name}`);
+        }
+      }
+
+      // Create order
+      const order = new Order({
+        user: context.user.userId,
+        items: cart.items.map(item => ({
+          product: item.product._id,
+          quantity: item.quantity
+        })),
+        totalAmount: cart.totalAmount,
+        status: 'PENDING'
+      });
+
+      // Update product stock
+      for (const item of cart.items) {
+        await Product.findByIdAndUpdate(item.product._id, {
+          $inc: { stock: -item.quantity }
+        });
+      }
+
+      await order.save();
+      
+      // Clear cart
+      cart.items = [];
+      cart.totalAmount = 0;
+      await cart.save();
+
+      return await order.populate('user').populate('items.product');
+    } catch (error) {
+      throw new Error('Error checking out cart: ' + error.message);
+    }
   }
 };
+
+// Helper function to calculate cart total
+async function calculateCartTotal(items) {
+  let total = 0;
+  for (const item of items) {
+    const product = await Product.findById(item.product);
+    if (product) {
+      total += product.price * item.quantity;
+    }
+  }
+  return total;
+}
 
 module.exports = root; 

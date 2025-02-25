@@ -302,6 +302,147 @@
    }
    ```
 
+## Cart Queries
+1. **Get User's Cart**
+   ```graphql
+   query {
+     getCart {
+       _id
+       user {
+         _id
+         name
+         email
+       }
+       items {
+         product {
+           _id
+           name
+           price
+           stock
+         }
+         quantity
+       }
+       totalAmount
+     }
+   }
+   ```
+
+## Cart Mutations
+1. **Add Item to Cart**
+   ```graphql
+   mutation {
+     addToCart(
+       input: {
+         productId: "product_id_here"
+         quantity: 2
+       }
+     ) {
+       _id
+       items {
+         product {
+           name
+           price
+         }
+         quantity
+       }
+       totalAmount
+     }
+   }
+   ```
+
+2. **Update Cart Item Quantity**
+   ```graphql
+   mutation {
+     updateCartItem(
+       productId: "product_id_here"
+       quantity: 3
+     ) {
+       _id
+       items {
+         product {
+           name
+           price
+         }
+         quantity
+       }
+       totalAmount
+     }
+   }
+   ```
+
+3. **Remove Item from Cart**
+   ```graphql
+   mutation {
+     removeFromCart(productId: "product_id_here") {
+       _id
+       items {
+         product {
+           name
+         }
+         quantity
+       }
+       totalAmount
+     }
+   }
+   ```
+
+4. **Clear Cart**
+   ```graphql
+   mutation {
+     clearCart {
+       _id
+       items {
+         product {
+           name
+         }
+         quantity
+       }
+       totalAmount
+     }
+   }
+   ```
+
+5. **Checkout Cart**
+   ```graphql
+   mutation {
+     checkoutCart {
+       _id
+       user {
+         name
+         email
+       }
+       items {
+         product {
+           name
+           price
+         }
+         quantity
+       }
+       totalAmount
+       status
+       createdAt
+     }
+   }
+   ```
+
+## Cart Operation Notes
+1. All cart operations require authentication (Bearer Token)
+2. Cart is automatically created for new users
+3. Adding same product multiple times updates quantity
+4. Quantity must be positive integer
+5. Stock availability is checked during:
+   - Adding items
+   - Updating quantities
+   - Checkout
+6. Cart is cleared after successful checkout
+7. Checkout creates a new order
+8. Common error scenarios:
+   - Not authenticated
+   - Product not found
+   - Insufficient stock
+   - Invalid quantity
+   - Empty cart (for checkout)
+
 ## Testing Notes
 1. GraphQL endpoint: `http://localhost:3000/graphql`
 

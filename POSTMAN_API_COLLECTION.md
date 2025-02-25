@@ -83,6 +83,144 @@
    - URL: `http://localhost:3000/api/products/:id`
    - Auth: Bearer Token
 
+## Cart Operations
+1. **Add Item to Cart**
+   - Method: POST
+   - URL: `http://localhost:3000/api/cart/items`
+   - Auth: Bearer Token
+   - Body (raw JSON):
+   ```json
+   {
+     "productId": "product_id_here",
+     "quantity": 2
+   }
+   ```
+   - Example Response:
+   ```json
+   {
+     "cart": {
+       "_id": "cart_id",
+       "user": "user_id",
+       "items": [
+         {
+           "product": {
+             "_id": "product_id",
+             "name": "Product Name",
+             "price": 99.99
+           },
+           "quantity": 2
+         }
+       ],
+       "totalAmount": 199.98
+     }
+   }
+   ```
+
+2. **Get Cart**
+   - Method: GET
+   - URL: `http://localhost:3000/api/cart`
+   - Auth: Bearer Token
+   - Example Response:
+   ```json
+   {
+     "cart": {
+       "_id": "cart_id",
+       "user": "user_id",
+       "items": [
+         {
+           "product": {
+             "_id": "product_id",
+             "name": "Product Name",
+             "price": 99.99,
+             "image": "image_url"
+           },
+           "quantity": 2
+         }
+       ],
+       "totalAmount": 199.98
+     }
+   }
+   ```
+
+3. **Update Cart Item Quantity**
+   - Method: PATCH
+   - URL: `http://localhost:3000/api/cart/items/:productId`
+   - Auth: Bearer Token
+   - Body (raw JSON):
+   ```json
+   {
+     "quantity": 3
+   }
+   ```
+   - Example Response:
+   ```json
+   {
+     "cart": {
+       "_id": "cart_id",
+       "items": [
+         {
+           "product": {
+             "name": "Product Name",
+             "price": 99.99
+           },
+           "quantity": 3
+         }
+       ],
+       "totalAmount": 299.97
+     }
+   }
+   ```
+
+4. **Remove Item from Cart**
+   - Method: DELETE
+   - URL: `http://localhost:3000/api/cart/items/:productId`
+   - Auth: Bearer Token
+   - Example Response:
+   ```json
+   {
+     "message": "Item removed from cart",
+     "cart": {
+       "_id": "cart_id",
+       "items": [...],
+       "totalAmount": 0
+     }
+   }
+   ```
+
+5. **Clear Cart**
+   - Method: DELETE
+   - URL: `http://localhost:3000/api/cart`
+   - Auth: Bearer Token
+   - Example Response:
+   ```json
+   {
+     "message": "Cart cleared successfully",
+     "cart": {
+       "_id": "cart_id",
+       "items": [],
+       "totalAmount": 0
+     }
+   }
+   ```
+
+6. **Checkout Cart**
+   - Method: POST
+   - URL: `http://localhost:3000/api/cart/checkout`
+   - Auth: Bearer Token
+   - Example Response:
+   ```json
+   {
+     "message": "Order created successfully",
+     "order": {
+       "_id": "order_id",
+       "items": [...],
+       "totalAmount": 299.97,
+       "status": "PENDING"
+     }
+   }
+   ```
+
+
 ## Orders
 1. **Get User Orders**
    - Method: GET

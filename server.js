@@ -7,6 +7,7 @@ const { graphqlHTTP } = require('express-graphql');
 const schema = require('./graphql/schema');
 const resolvers = require('./graphql/resolvers');
 const jwt = require('jsonwebtoken');
+const { isAuthenticated, isAdmin } = require('./middleware/authMiddleware');
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -67,8 +68,25 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes); 
 app.use('/api/orders', orderRoutes); 
 
-// GraphQL endpoint
-app.use('/graphql', graphqlHTTP((req) => ({
+// GraphQL-specific auth middleware
+const graphqlAuth = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split('Bearer ')[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      req.user.isAuthenticated = true;
+      req.user.isAdmin = decoded.role === 'admin';
+    } catch (err) {
+      console.error('Token verification failed:', err.message);
+    }
+  }
+  next();
+};
+
+// Apply GraphQL middleware
+app.use('/graphql', graphqlAuth, graphqlHTTP((req) => ({
   schema: schema,
   rootValue: resolvers,
   graphiql: {
@@ -89,7 +107,14 @@ mutation {
 # }
 `,
   },
-  context: { user: req.user }, // Pass the user from auth middleware to resolvers
+  context: {
+    user: {
+      isAuthenticated: !!req.user?.isAuthenticated,
+      isAdmin: !!req.user?.isAdmin,
+      userId: req.user?._id || req.user?.userId,
+      role: req.user?.role
+    }
+  }
 })));
 
 // Start Server
