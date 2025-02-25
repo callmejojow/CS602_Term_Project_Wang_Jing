@@ -203,24 +203,6 @@
    }
    ```
 
-6. **Checkout Cart**
-   - Method: POST
-   - URL: `http://localhost:3000/api/cart/checkout`
-   - Auth: Bearer Token
-   - Example Response:
-   ```json
-   {
-     "message": "Order created successfully",
-     "order": {
-       "_id": "order_id",
-       "items": [...],
-       "totalAmount": 299.97,
-       "status": "PENDING"
-     }
-   }
-   ```
-
-
 ## Orders
 1. **Get User Orders**
    - Method: GET
