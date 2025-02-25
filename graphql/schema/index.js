@@ -94,7 +94,6 @@ const schema = buildSchema(`
   type AuthData {
     userId: ID!
     token: String!
-    tokenExpiration: Int!
     role: UserRole!
   }
 
@@ -102,7 +101,6 @@ const schema = buildSchema(`
     # User Queries
     getUser(id: ID!): User
     getAllUsers: [User!]!
-    me: User
     
     # Product Queries
     getAllProducts: [Product!]!
@@ -134,10 +132,6 @@ const schema = buildSchema(`
     createOrder(input: CreateOrderInput!): Order!
     updateOrderStatus(id: ID!, input: UpdateOrderStatusInput!): Order!
     deleteOrder(id: ID!): Boolean!
-  }
-
-  type Subscription {
-    orderStatusChanged: Order!
   }
 `);
 

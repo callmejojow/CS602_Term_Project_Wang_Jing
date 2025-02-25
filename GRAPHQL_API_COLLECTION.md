@@ -1,5 +1,17 @@
 # Jing's Gizmo Trove GraphQL API Collection
 
+## Authentication
+1. **Login**
+   ```graphql
+   mutation {
+     login(email: "test@example.com", password: "password123") {
+       userId
+       token
+       role
+     }
+   }
+   ```
+
 ## User Queries
 1. **Get User**
    ```graphql
@@ -37,7 +49,7 @@
        description
        price
        stock
-       imageUrl
+       image
        createdAt
      }
    }
@@ -52,7 +64,7 @@
        description
        price
        stock
-       imageUrl
+       image
      }
    }
    ```
@@ -203,7 +215,7 @@
        description: "Product description"
        price: 99.99
        stock: 100
-       imageUrl: "https://example.com/image.jpg"
+       image: "https://example.com/image.jpg"
      }) {
        _id
        name
