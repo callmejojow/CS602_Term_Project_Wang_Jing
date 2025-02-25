@@ -2,8 +2,7 @@ const cartType = `
   type Cart {
     _id: ID!
     user: User!
-    items: [CartItem!]!
-    totalAmount: Float!
+    items: [CartItem!]!s
   }
 
   type CartItem {
